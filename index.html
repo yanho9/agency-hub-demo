@@ -11,7 +11,7 @@
     .section { display:none; padding:2rem; }
     .active { display:block; }
     .card { background:white; padding:1.5rem; margin-bottom:1rem; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    textarea { width:100%; min-height:120px; margin-top:1rem; }
+    textarea { width:100%; min-height:160px; margin-top:1rem; }
     .form-control { margin-bottom:1rem; }
     button { cursor:pointer; }
     .campaign { border:1px solid #ddd; padding:1rem; margin-bottom:0.5rem; border-radius:8px; }
@@ -43,14 +43,6 @@
       <div class="card">
         <h3>AI Copilot</h3>
         <div class="form-control">
-          <label>Type:</label>
-          <select id="typeDropdown">
-            <option>Social Post</option>
-            <option>Email</option>
-            <option>Ad Copy</option>
-          </select>
-        </div>
-        <div class="form-control">
           <label>Topic:</label>
           <input type="text" id="topicInput" placeholder="Enter a topic"/>
         </div>
@@ -58,17 +50,8 @@
           <label>Style:</label>
           <input type="text" id="styleInput" placeholder="Enter a style (e.g. Friendly)"/>
         </div>
-        <div class="form-control">
-          <label>Canva Template:</label>
-          <select id="canvaTemplateDropdown">
-            <option value="instagram-post">Instagram Post</option>
-            <option value="facebook-ad">Facebook Ad</option>
-            <option value="story">Story</option>
-            <option value="poster">Poster</option>
-          </select>
-        </div>
         <button id="generateButton">Generate</button>
-        <button id="copyButton">Copy</button>
+        <button id="copyButton">Copy All</button>
         <button id="canvaButton">Open in Canva</button>
         <textarea id="outputBox" placeholder="Generated content will appear here..."></textarea>
       </div>
@@ -104,32 +87,29 @@
       document.getElementById(section).classList.add('active');
     }
 
-    // Dummy AI generation
+    // Generate ALL content types at once
     document.getElementById('generateButton').onclick = () => {
-      const type = document.getElementById('typeDropdown').value;
       const topic = document.getElementById('topicInput').value || "your product";
       const style = document.getElementById('styleInput').value || "friendly";
-      document.getElementById('outputBox').value =
-        `Here’s a ${style} ${type.toLowerCase()} about "${topic}":\n\n✨ Make your mark today!`;
+
+      const social = `💬 Social Post (${style}): Ready to shine? "${topic}" is here to make your day better! #${topic.replace(/\s+/g,'')}`;
+      const email = `📧 Email (${style}): Subject: "${topic}" — Unlock exclusive benefits today!`;
+      const ad = `📢 Ad Copy (${style}): "${topic}" — Don’t miss out. Limited offer, act now!`;
+
+      const output = `${social}\n\n${email}\n\n${ad}`;
+      document.getElementById('outputBox').value = output;
     };
 
-    // Copy
+    // Copy all
     document.getElementById('copyButton').onclick = () => {
       navigator.clipboard.writeText(document.getElementById('outputBox').value);
-      alert("Copied to clipboard!");
+      alert("All content copied!");
     };
 
-    // Canva integration (dummy)
+    // Canva Docs link
     document.getElementById('canvaButton').onclick = () => {
       const content = encodeURIComponent(document.getElementById('outputBox').value);
-      const template = document.getElementById('canvaTemplateDropdown').value;
-      const templateIds = {
-        'instagram-post': 'TABQqs5Kbyc',
-        'facebook-ad': 'q8X9Zp6b8J4',
-        'story': 'VJ8J6G9j8K5',
-        'poster': 'L8J7F6D9J3'
-      };
-      const url = `https://www.canva.com/create/design/${templateIds[template]}?text=${content}`;
+      const url = `https://www.canva.com/docx/?text=${content}`;
       window.open(url, '_blank');
     };
 
