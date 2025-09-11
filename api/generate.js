@@ -8,16 +8,20 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // Parse JSON body safely
+    // ✅ Explicitly parse JSON body
     let body = {};
-    try {
-      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    } catch (err) {
-      console.error('Body parse error:', err);
+    if (req.body) {
+      if (typeof req.body === 'string') {
+        body = JSON.parse(req.body);
+      } else {
+        body = req.body;
+      }
     }
 
     const { topic = '', style = '' } = body;
-    if (!topic) return res.status(400).json({ error: 'Missing topic' });
+    if (!topic) {
+      return res.status(400).json({ error: 'Missing topic' });
+    }
 
     const systemPrompt = `You are a helpful marketing assistant. 
 Given a topic and style, produce:
