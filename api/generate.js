@@ -8,19 +8,27 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // ✅ Explicitly parse JSON body
+    // ✅ Ensure request body is parsed safely
     let body = {};
-    if (req.body) {
-      if (typeof req.body === 'string') {
-        body = JSON.parse(req.body);
-      } else {
-        body = req.body;
+    try {
+      if (req.body) {
+        body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      } else if (req.rawBody) {
+        body = JSON.parse(req.rawBody.toString());
       }
+    } catch (err) {
+      console.error('Body parse error:', err);
     }
 
     const { topic = '', style = '' } = body;
     if (!topic) {
+      console.error('Missing topic in request');
       return res.status(400).json({ error: 'Missing topic' });
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('Missing OPENAI_API_KEY');
+      return res.status(500).json({ error: 'No OpenAI API key configured' });
     }
 
     const systemPrompt = `You are a helpful marketing assistant. 
