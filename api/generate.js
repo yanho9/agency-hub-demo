@@ -8,7 +8,15 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const { topic = '', style = '' } = req.body || {};
+    // Parse JSON body safely
+    let body = {};
+    try {
+      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch (err) {
+      console.error('Body parse error:', err);
+    }
+
+    const { topic = '', style = '' } = body;
     if (!topic) return res.status(400).json({ error: 'Missing topic' });
 
     const systemPrompt = `You are a helpful marketing assistant. 
@@ -44,6 +52,12 @@ Output:
       })
     });
 
+    if (!openaiResp.ok) {
+      const errText = await openaiResp.text();
+      console.error('OpenAI API error:', errText);
+      return res.status(500).json({ error: 'OpenAI API failed', details: errText });
+    }
+
     const data = await openaiResp.json();
     const reply = data.choices?.[0]?.message?.content || '';
 
@@ -55,12 +69,12 @@ Output:
         parsed = JSON.parse(reply.slice(first, last + 1));
       }
     } catch (e) {
-      console.error('Parse error', e);
+      console.error('JSON parse error:', e);
     }
 
     res.status(200).json({ success: true, raw: reply, parsed });
   } catch (err) {
-    console.error(err);
+    console.error('Server error:', err);
     res.status(500).json({ error: err.message });
   }
 };
