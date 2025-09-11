@@ -56,6 +56,14 @@
       margin-top: 0;
       color: #1E3A8A;
     }
+    .notice {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+    }
     .form {
       background: #fff;
       padding: 20px;
@@ -149,13 +157,13 @@
     }
     .btn-copy { background: #1E3A8A; }
     .btn-canva { background: #F59E0B; }
+    .btn-upgrade { background: #10b981; margin: 10px 20px; }
   </style>
 </head>
 <body>
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">
-      <!-- Replace logo.png with your real logo -->
       <img src="logo.png" alt="Agency Logo">
       <h2>Your Agency</h2>
     </div>
@@ -163,12 +171,13 @@
     <div class="nav-item">🎨 Canva</div>
     <div class="nav-item">📊 Reports</div>
     <div class="nav-item">⚙️ Settings</div>
+    <button class="btn-upgrade" onclick="upgrade()">💳 Upgrade</button>
   </div>
 
   <!-- Main -->
   <div class="main">
     <h1>🚀 AI Copilot</h1>
-    <p>Generate social posts, emails, and ad copy instantly — ready to use in Canva.</p>
+    <div id="quotaNotice" class="notice"></div>
 
     <!-- Form -->
     <div class="form">
@@ -177,7 +186,7 @@
       <label for="styleInput">Style (optional)</label>
       <input id="styleInput" type="text" placeholder="e.g. Friendly, Professional">
       <div class="actions">
-        <button class="btn-generate">✨ Generate</button>
+        <button class="btn-generate" onclick="tryGenerate()">✨ Generate</button>
         <button class="btn-download">⬇️ Download All</button>
       </div>
     </div>
@@ -190,34 +199,50 @@
         <button class="tab-btn" data-tab="ads">📢 Ads</button>
       </div>
       <div id="social" class="tab-content active">
-        <div class="card">
-          <h4>Social Post #1</h4>
-          <p>🔥 Big Summer Sale is here! Get 30% off all products this week only. Don’t miss out!</p>
-          <button class="btn btn-copy">📋 Copy</button>
-          <button class="btn btn-canva">🎨 Canva</button>
-        </div>
+        <div class="card"><h4>Social Post #1</h4><p>🔥 Demo content: Summer Sale is here! 30% off.</p></div>
       </div>
       <div id="emails" class="tab-content">
-        <div class="card">
-          <h4>Email Copy #1</h4>
-          <p>Subject: Don’t miss our Summer Sale 🎉<br><br>
-          Body: Hi there! We’re offering 30% off all products this week only. Click below to shop now!</p>
-          <button class="btn btn-copy">📋 Copy</button>
-          <button class="btn btn-canva">🎨 Canva</button>
-        </div>
+        <div class="card"><h4>Email Copy #1</h4><p>Subject: Don’t miss our Summer Sale 🎉<br><br>Body: Hi there! Save 30% this week.</p></div>
       </div>
       <div id="ads" class="tab-content">
-        <div class="card">
-          <h4>Ad Copy #1</h4>
-          <p>Need a fresh look this summer? 🌞 Shop now and enjoy 30% off all styles this week only!</p>
-          <button class="btn btn-copy">📋 Copy</button>
-          <button class="btn btn-canva">🎨 Canva</button>
-        </div>
+        <div class="card"><h4>Ad Copy #1</h4><p>🌞 Shop now and enjoy 30% off all styles this week only!</p></div>
       </div>
     </div>
   </div>
 
   <script>
+    // Quota logic (5 free uses)
+    let quota = parseInt(localStorage.getItem('quota') || '5');
+    function updateNotice() {
+      const el = document.getElementById('quotaNotice');
+      if (quota > 0) {
+        el.innerText = `🎁 Free trial: ${quota} generations remaining`;
+      } else {
+        el.innerText = "⚠️ Free trial ended. Please upgrade to continue.";
+      }
+    }
+    updateNotice();
+
+    function tryGenerate() {
+      if (quota <= 0) {
+        alert("Your free trial is over. Please upgrade to continue!");
+        return;
+      }
+      quota--;
+      localStorage.setItem('quota', quota);
+      updateNotice();
+      alert("✅ Demo: This would generate new content.");
+    }
+
+    // Upgrade → Stripe Checkout
+    async function upgrade() {
+      // Placeholder: connect this to your Stripe API
+      alert("Redirecting to Stripe Checkout (demo placeholder)...");
+      // const r = await fetch('/api/checkout', { method: 'POST' });
+      // const { url } = await r.json();
+      // window.location = url;
+    }
+
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
