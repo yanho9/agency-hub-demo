@@ -1,6 +1,4 @@
 // api/generate.js
-// Using global fetch (built into Node.js 18+)
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST');
@@ -9,26 +7,17 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // ✅ Ensure request body is parsed safely
     let body = {};
-    try {
-      if (req.body) {
-        body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-      } else if (req.rawBody) {
-        body = JSON.parse(req.rawBody.toString());
-      }
-    } catch (err) {
-      console.error('Body parse error:', err);
+    if (req.body) {
+      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } else if (req.rawBody) {
+      body = JSON.parse(req.rawBody.toString());
     }
 
     const { topic = '', style = '' } = body;
-    if (!topic) {
-      console.error('Missing topic in request');
-      return res.status(400).json({ error: 'Missing topic' });
-    }
+    if (!topic) return res.status(400).json({ error: 'Missing topic' });
 
     if (!process.env.OPENAI_API_KEY) {
-      console.error('Missing OPENAI_API_KEY');
       return res.status(500).json({ error: 'No OpenAI API key configured' });
     }
 
@@ -48,7 +37,7 @@ Output:
   "ad_copies": ["...","..."]
 }`;
 
-    const openaiResp = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -65,13 +54,13 @@ Output:
       })
     });
 
-    if (!openaiResp.ok) {
-      const errText = await openaiResp.text();
+    if (!response.ok) {
+      const errText = await response.text();
       console.error('OpenAI API error:', errText);
       return res.status(500).json({ error: 'OpenAI API failed', details: errText });
     }
 
-    const data = await openaiResp.json();
+    const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || '';
 
     let parsed = null;
